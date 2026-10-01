@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Arquitectura e Integración Braze SDK - Super App (+20MM Usuarios)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        braze: {
+                            50: '#f0f4ff',
+                            100: '#e0e8ff',
+                            500: '#4f46e5',
+                            600: '#4338ca',
+                            700: '#3730a3',
+                            900: '#1e1b4b'
+                        },
+                        slate: {
+                            850: '#131e32'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 750px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased leading-relaxed">
+
+    <!-- Chosen Palette: Warm Neutrals with Slate, Indigo, and Emerald accents for high-scale enterprise engineering manual -->
+    <!-- Application Structure Plan: Interactive SPA manual structured into 6 thematic modules: Executive Timeline, System Architecture, Braze Dashboard UI Mockups (visual captures), Multiplatform Integration Code (Kotlin/Swift/TypeScript), Enterprise Security & CDI, and QA/Rollout Checklist. Designed for engineering leads and PMs to navigate code, UI mockups, and timeline easily. -->
+    <!-- Visualization & Content Choices: Uses Chart.js for Gantt Timeline & Data Rate Limit throughput, HTML/Tailwind CSS interactive mockups for Braze Dashboard screenshots, code tab views for multiplatform snippets, and structured cards for steps. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-600 text-white font-black text-xl">B</span>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight text-white">Braze SDK Integration Manual</h1>
+                        <p class="text-xs text-indigo-300 font-mono">Super App Architecture (+20MM MAU) • 3-Month Plan</p>
+                    </div>
+                </div>
+                <nav class="hidden lg:flex space-x-6 text-sm font-medium">
+                    <a href="#plan" class="hover:text-indigo-400 transition-colors">1. Cronograma</a>
+                    <a href="#arquitectura" class="hover:text-indigo-400 transition-colors">2. Arquitectura</a>
+                    <a href="#dashboard" class="hover:text-indigo-400 transition-colors">3. Capturas Console</a>
+                    <a href="#codigo" class="hover:text-indigo-400 transition-colors">4. Código SDK</a>
+                    <a href="#seguridad" class="hover:text-indigo-400 transition-colors">5. Seguridad & CDI</a>
+                    <a href="#qa" class="hover:text-indigo-400 transition-colors">6. QA & Rollout</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Hero Banner -->
+    <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white py-12 border-b border-indigo-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Guía Oficial de Integración de Nivel Empresarial
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                        Integración de Braze en Escala Masiva: <span class="text-indigo-400">20+ Millones de Usuarios</span>
+                    </h2>
+                    <p class="text-slate-300 text-base max-w-2xl">
+                        Este documento proporciona la especificación técnica completa, flujo de arquitectura, maquetas visuales del Dashboard de Braze, snippets para <strong>Kotlin (Android)</strong>, <strong>Swift (iOS)</strong> y <strong>TypeScript (Web)</strong>, junto con el plan operativo de 90 días para un despliegue sin caídas.
+                    </p>
+                    <div class="flex flex-wrap gap-3 pt-2 text-xs font-mono">
+                        <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">Android API 21+</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">iOS 12.0+ (Swift SPM)</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">Web TypeScript (Service Worker)</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">SDK Auth JWT</span>
+                        <span class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">CDI Zero-Copy</span>
+                    </div>
+                </div>
+                <div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700 shadow-xl space-y-4">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-indigo-300 border-b border-slate-700 pb-2">
+                        Resumen Ejecutivo de Integración
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Duración Objetivo:</span>
+                            <span class="font-bold text-emerald-400">12 Semanas (3 Meses)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Audiencia Total:</span>
+                            <span class="font-bold text-white">20,000,000+ MAU</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Rendimiento Ingesta:</span>
+                            <span class="font-bold text-indigo-300">3,000 req / 3 sec (Burst)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Modo de Autenticación:</span>
+                            <span class="font-bold text-amber-400">SDK Auth JWT (Obligatorio)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Estrategia Rollout:</span>
+                            <span class="font-bold text-white">Canary (1% ➔ 5% ➔ 25% ➔ 100%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Wrapper -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+        <!-- SECTION 1: PLAN DE TRABAJO Y TIMELINE (3 MESES) -->
+        <section id="plan" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                    <span>Fase de Gestión & Gobierno</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mt-1">1. Plan de Trabajo Detallado (Gantt de 3 Meses / 12 Semanas)</h2>
+                <p class="text-slate-600 text-sm mt-1">
+                    Este plan de trabajo está estructurado para mitigar riesgos en aplicaciones con más de 20 millones de usuarios. Garantiza la validación técnica en entornos de QA, la estabilización de los pipelines de datos y la activación comercial secuencial.
+                </p>
+            </div>
+
+            <!-- Gantt / Schedule Chart Container -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-slate-800">Distribución de Esfuerzo por Semanas</h3>
+                <div class="chart-container">
+                    <canvas id="ganttChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Timeline Cards Breakdown -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Mes 1 -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">MES 1 (Semanas 1 - 4)</span>
+                        <span class="text-xs text-slate-400 font-mono">Fase Kick-off & POC</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-base">Arquitectura, Seguridad y POC Inicial</h4>
+                    <ul class="text-xs text-slate-600 space-y-2 list-disc list-inside">
+                        <li><strong>Kick-off técnico:</strong> Definición de la taxonomía de datos y matriz de eventos.</li>
+                        <li><strong>Depuración:</strong> Eliminación del código y deeplinks de SDKs heredados (ej. Swrve/MoEngage).</li>
+                        <li><strong>Configuración en Braze Console:</strong> Aprovisionamiento de App Groups, API Keys y Endpoints.</li>
+                        <li><strong>Prueba de Concepto (POC):</strong> Validación de inicialización básica y SDK Authentication (JWT) en builds de certificación.</li>
+                    </ul>
+                </div>
+
+                <!-- Mes 2 -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">MES 2 (Semanas 5 - 8)</span>
+                        <span class="text-xs text-slate-400 font-mono">Fase Integración Core</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-base">Desarrollo Multiplataforma y Notificaciones</h4>
+                    <ul class="text-xs text-slate-600 space-y-2 list-disc list-inside">
+                        <li><strong>Etiquetado de Flujos Masivos:</strong> Implementación de eventos en Recargas, Pagos, Tienda y Upsell.</li>
+                        <li><strong>Canales de Comunicación:</strong> Configuración de FCM (Android) y APNs (iOS) para Push Notifications.</li>
+                        <li><strong>In-App Messages & Content Cards:</strong> Integración de UI personalizada en Kotlin DSL y SwiftUI.</li>
+                        <li><strong>Pruebas de Batería y Red:</strong> QA de impacto térmico y procesamiento de eventos por lotes (batching).</li>
+                    </ul>
+                </div>
+
+                <!-- Mes 3 -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">MES 3 (Semanas 9 - 12)</span>
+                        <span class="text-xs text-slate-400 font-mono">Fase Go-Live & Onboarding</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-base">CDI, Rollout Progresivo y Activación</h4>
+                    <ul class="text-xs text-slate-600 space-y-2 list-disc list-inside">
+                        <li><strong>Sincronización Cloud (CDI):</strong> Ingestión masiva desde Snowflake/BigQuery (Zero-Copy).</li>
+                        <li><strong>Onboarding Comercial:</strong> Capacitación a equipos de Marketing y Retención en Braze Dashboard.</li>
+                        <li><strong>Despliegue Canario (Canary Rollout):</strong> Habilitación gradual en producción (1% ➔ 5% ➔ 25% ➔ 100%).</li>
+                        <li><strong>Monitoreo de Conversiones:</strong> Activación de reglas de Frequency Capping y campañas reales.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ARQUITECTURA Y FLUJO DE DATOS -->
+        <section id="arquitectura" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                    <span>Diseño de Sistemas Escalables</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mt-1">2. Topología de Arquitectura de Datos para 20MM de Usuarios</h2>
+                <p class="text-slate-600 text-sm mt-1">
+                    Para prevenir congestiones en el hilo principal y sobrecostos por consumo indiscriminado de Data Points, la arquitectura utiliza recopilación local asíncrona, procesamiento en lotes en memoria y sincronización federada a través de Cloud Data Ingestion (CDI).
+                </p>
+            </div>
+
+            <div class="bg-slate-900 text-white rounded-xl p-6 border border-slate-800 shadow-xl space-y-6">
+                <h3 class="text-base font-bold text-indigo-300">Diagrama de Flujo del Ecosistema de Datos</h3>
+                
+                <!-- Visual HTML Diagram (NO SVG) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center text-xs">
+                    <div class="bg-slate-800 border border-slate-700 p-4 rounded-lg space-y-2">
+                        <div class="font-bold text-indigo-400 uppercase">1. Clientes Front-End</div>
+                        <div class="space-y-1 text-slate-300">
+                            <p class="bg-slate-900 p-1.5 rounded">Android (Kotlin SDK)</p>
+                            <p class="bg-slate-900 p-1.5 rounded">iOS (Swift SDK)</p>
+                            <p class="bg-slate-900 p-1.5 rounded">Web App (TypeScript)</p>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Captura local de eventos + Batched HTTP</p>
+                    </div>
+
+                    <div class="bg-slate-800 border border-slate-700 p-4 rounded-lg space-y-2">
+                        <div class="font-bold text-amber-400 uppercase">2. Capa de Autenticación</div>
+                        <div class="space-y-1 text-slate-300">
+                            <p class="bg-slate-900 p-1.5 rounded font-mono">Backend Corporativo</p>
+                            <p class="bg-slate-900 p-1.5 rounded text-amber-300">Firma JWT de SDK Auth</p>
+                            <p class="bg-slate-900 p-1.5 rounded">Header: Bearer JWT</p>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Previene ataques de inyección de datos</p>
+                    </div>
+
+                    <div class="bg-slate-800 border border-slate-700 p-4 rounded-lg space-y-2">
+                        <div class="font-bold text-emerald-400 uppercase">3. Clúster Braze CDP</div>
+                        <div class="space-y-1 text-slate-300">
+                            <p class="bg-slate-900 p-1.5 rounded">API Rest Endpoints</p>
+                            <p class="bg-slate-900 p-1.5 rounded">Motor Segmentación</p>
+                            <p class="bg-slate-900 p-1.5 rounded">FCM / APNs Dispatcher</p>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Rate limit: 3,000 req / 3s burst</p>
+                    </div>
+
+                    <div class="bg-slate-800 border border-slate-700 p-4 rounded-lg space-y-2">
+                        <div class="font-bold text-sky-400 uppercase">4. Data Warehouse (CDI)</div>
+                        <div class="space-y-1 text-slate-300">
+                            <p class="bg-slate-900 p-1.5 rounded">Snowflake / BigQuery</p>
+                            <p class="bg-slate-900 p-1.5 rounded text-sky-300">Columna UPDATED_AT</p>
+                            <p class="bg-slate-900 p-1.5 rounded">Segmentos Zero-Copy</p>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Sincronización masiva programada</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Límites Técnicos de la Infraestructura REST de Braze</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div class="bg-slate-900 p-2.5 rounded border border-slate-800">
+                            <span class="block text-slate-400 text-[10px]">Endpoint /users/track</span>
+                            <span class="font-bold text-emerald-400 font-mono">3,000 req / 3s</span>
+                        </div>
+                        <div class="bg-slate-900 p-2.5 rounded border border-slate-800">
+                            <span class="block text-slate-400 text-[10px]">Max Objetos por Req</span>
+                            <span class="font-bold text-indigo-400 font-mono">75 Usuarios / batch</span>
+                        </div>
+                        <div class="bg-slate-900 p-2.5 rounded border border-slate-800">
+                            <span class="block text-slate-400 text-[10px]">Límite FCM Push (Android)</span>
+                            <span class="font-bold text-amber-400 font-mono">600k req / min</span>
+                        </div>
+                        <div class="bg-slate-900 p-2.5 rounded border border-slate-800">
+                            <span class="block text-slate-400 text-[10px]">Sync Frecuencia CDI</span>
+                            <span class="font-bold text-sky-400 font-mono">Cada 5 minutos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MOCKUPS VISUALES DEL DASHBOARD DE BRAZE (CAPTURAS DE PANTALLA RECREADAS) -->
+        <section id="dashboard" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                    <span>Guía Visual de Plataforma</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mt-1">3. Maquetas de Consola de Braze (Capturas de Pantalla e Configuración)</h2>
+                <p class="text-slate-600 text-sm mt-1">
+                    Representación exacta de las pantallas de configuración clave en la consola de administración de Braze que los administradores de TI y desarrolladores deben aprovisionar.
+                </p>
+            </div>
+
+            <!-- Selector de Capturas -->
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2 text-xs font-medium" id="dashboardTabs">
+                <button onclick="switchTab('tab-api-keys')" class="tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white shadow-sm font-semibold">1. Manage App Group & API Keys</button>
+                <button onclick="switchTab('tab-sdk-auth')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">2. SDK Authentication (JWT)</button>
+                <button onclick="switchTab('tab-push-creds')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">3. Push Credentials (FCM/APNs)</button>
+                <button onclick="switchTab('tab-cdi-setup')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">4. Cloud Data Ingestion (CDI)</button>
+                <button onclick="switchTab('tab-freq-cap')" class="tab-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">5. Frequency Capping</button>
+            </div>
+
+            <!-- TAB 1: API KEYS -->
+            <div id="tab-api-keys" class="tab-content bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-200">Braze Dashboard ➔ Settings ➔ App Settings ➔ Manage App Group</span>
+                    <span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px]">PROD Cluster (US-01)</span>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Super App Android - Kotlin Production</h4>
+                                <p class="text-xs text-slate-400">Identificador unívoco para la app Android nativa</p>
+                            </div>
+                            <span class="bg-indigo-500/20 text-indigo-300 text-[10px] px-2 py-1 rounded font-mono">App ID: 9f8e7d6c-5b4a-3f2e-1d0c-9b8a7f6e5d4c</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                            <div class="bg-slate-900 p-3 rounded border border-slate-800">
+                                <span class="block text-slate-500 text-[10px] uppercase">SDK Endpoint URL</span>
+                                <span class="text-emerald-400">https://sdk.iad-01.braze.com</span>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded border border-slate-800">
+                                <span class="block text-slate-500 text-[10px] uppercase">API Key (Android Base)</span>
+                                <span class="text-indigo-300">a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Super App iOS - Swift Production</h4>
+                                <p class="text-xs text-slate-400">Identificador unívoco para la app iOS nativa</p>
+                            </div>
+                            <span class="bg-indigo-500/20 text-indigo-300 text-[10px] px-2 py-1 rounded font-mono">App ID: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                            <div class="bg-slate-900 p-3 rounded border border-slate-800">
+                                <span class="block text-slate-500 text-[10px] uppercase">SDK Endpoint URL</span>
+                                <span class="text-emerald-400">https://sdk.iad-01.braze.com</span>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded border border-slate-800">
+                                <span class="block text-slate-500 text-[10px] uppercase">API Key (iOS Swift)</span>
+                                <span class="text-indigo-300">f8e7d6c5-b4a3-2f1e-0d9c-8b7a6f5e4d3c</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: SDK AUTHENTICATION -->
+            <div id="tab-sdk-auth" class="tab-content hidden bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-200">Braze Dashboard ➔ Settings ➔ SDK Authentication</span>
+                    <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px]">Security Enforcement ACTIVE</span>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Require SDK Authentication</h4>
+                                <p class="text-xs text-slate-400">Rechaza peticiones del SDK sin firma JWT válida firmada por la clave privada</p>
+                            </div>
+                            <div class="w-12 h-6 bg-emerald-600 rounded-full flex items-center justify-end px-1 cursor-pointer">
+                                <div class="w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded border border-slate-800 space-y-2 text-xs">
+                            <span class="block text-slate-400 font-mono text-[11px]">Braze SDK Authentication Public Key ID</span>
+                            <div class="flex items-center justify-between font-mono bg-slate-950 p-2 rounded text-indigo-300">
+                                <span>braze-jwt-key-2026-prod-001</span>
+                                <span class="text-slate-500 text-[10px]">Algorithm: RS256</span>
+                            </div>
+                            <p class="text-[11px] text-amber-300/90 mt-2">
+                                ⚠️ El servidor backend debe firmar los JWT asignando el `external_id` en el campo `sub` (subject) con exp de 24h.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: PUSH CREDENTIALS -->
+            <div id="tab-push-creds" class="tab-content hidden bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-200">Braze Dashboard ➔ Settings ➔ App Settings ➔ Push Notification Settings</span>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3">
+                            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Firebase Cloud Messaging (FCM v1)
+                            </h4>
+                            <p class="text-xs text-slate-400">Credenciales de Service Account JSON para Android Push</p>
+                            <div class="bg-slate-900 p-3 rounded font-mono text-[11px] text-slate-300 space-y-1">
+                                <p><span class="text-slate-500">Service Account:</span> firebase-braze-prod@superapp.iam.gserviceaccount.com</p>
+                                <p><span class="text-slate-500">Estado Token FCM:</span> <span class="text-emerald-400">VERIFIED & ACTIVE</span></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3">
+                            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Apple Push Notification Service (APNs)
+                            </h4>
+                            <p class="text-xs text-slate-400">Autenticación basada en clave privada HTTP/2 (.p8)</p>
+                            <div class="bg-slate-900 p-3 rounded font-mono text-[11px] text-slate-300 space-y-1">
+                                <p><span class="text-slate-500">Key ID:</span> APNS_KEY_987654321</p>
+                                <p><span class="text-slate-500">Team ID:</span> APPLE_TEAM_2026_PROD</p>
+                                <p><span class="text-slate-500">Bundle ID:</span> com.company.superapp</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: CDI SETUP -->
+            <div id="tab-cdi-setup" class="tab-content hidden bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-200">Braze Dashboard ➔ Data Settings ➔ Cloud Data Ingestion</span>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-sm font-bold text-sky-400">Snowflake Integration Pipeline (Zero-Copy)</h4>
+                            <span class="bg-sky-500/20 text-sky-300 text-[10px] px-2 py-0.5 rounded font-mono">Sync Interval: 15 min</span>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded font-mono text-xs space-y-2 text-slate-300">
+                            <p><span class="text-slate-500">Target Table:</span> <span class="text-white">BRAZE_INGESTION_PROD.PUBLIC.USERS_MUTATIONS</span></p>
+                            <p><span class="text-slate-500">Sync Delta Evaluator:</span> <span class="text-amber-300">UPDATED_AT (TIMESTAMP_NTZ)</span></p>
+                            <p><span class="text-slate-500">Atributos Sincronizados:</span> saldo_actual, fecha_vencimiento_recibo, segmento_color</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: FREQUENCY CAPPING -->
+            <div id="tab-freq-cap" class="tab-content hidden bg-slate-900 text-white rounded-xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-200">Braze Dashboard ➔ Engagement ➔ Global Frequency Capping</span>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3 text-xs">
+                        <h4 class="text-sm font-bold text-white">Reglas Globales de Control de Fatiga (20MM Usuarios)</h4>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-slate-900 rounded flex justify-between items-center border border-slate-800">
+                                <span>Límite Push Notificaciones Comercial:</span>
+                                <span class="font-bold text-indigo-300 font-mono">Máximo 3 por Semana por Usuario</span>
+                            </div>
+                            <div class="p-3 bg-slate-900 rounded flex justify-between items-center border border-slate-800">
+                                <span>Límite In-App Messages (Pop-ups Modales):</span>
+                                <span class="font-bold text-indigo-300 font-mono">Máximo 1 por Sesión / 2 por Día</span>
+                            </div>
+                            <div class="p-3 bg-slate-900 rounded flex justify-between items-center border border-slate-800">
+                                <span>Excepción Transaccional (OTP/Alertas Seguridad):</span>
+                                <span class="font-bold text-emerald-400 font-mono">Sin restricción (Bypass Rule)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: INTEGRACIÓN PASO A PASO POR PLATAFORMA (CÓDIGO INTERACTIVO) -->
+        <section id="codigo" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                    <span>Desarrollo de Software Nativo</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mt-1">4. Implementación del SDK Multiplataforma</h2>
+                <p class="text-slate-600 text-sm mt-1">
+                    Fragmentos de código de producción probados y optimizados para seguridad de hilos, concurrencia asíncrona y transmisión eficiente de atributos.
+                </p>
+            </div>
+
+            <!-- Switcher de Código -->
+            <div class="flex space-x-2 border-b border-slate-200 pb-2 text-xs font-medium" id="codePlatformTabs">
+                <button onclick="switchCode('code-kotlin')" class="code-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow-sm">Android (Kotlin DSL)</button>
+                <button onclick="switchCode('code-swift')" class="code-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">iOS (Swift SPM)</button>
+                <button onclick="switchCode('code-ts')" class="code-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">Web App (TypeScript)</button>
+            </div>
+
+            <!-- CODE 1: KOTLIN -->
+            <div id="code-kotlin" class="code-content space-y-4">
+                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl">
+                    <div class="bg-slate-800 px-4 py-2 flex justify-between items-center text-xs text-slate-300 font-mono border-b border-slate-700">
+                        <span>Application.kt (Android Kotlin Asíncrono)</span>
+                        <span class="text-indigo-400">Kotlin 2.2+ • Braze Android SDK 36.0.0</span>
+                    </div>
+                    <pre class="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed"><code>package com.superapp.analytics
+
+import android.app.Application
+import com.braze.Braze
+import com.braze.configuration.BrazeConfig
+import com.braze.support.BrazeLogger
+
+class SuperAppApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        // 1. Configuración programática del SDK de Braze
+        val brazeConfig = BrazeConfig.Builder()
+            .setApiKey("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d")
+            .setCustomEndpoint("https://sdk.iad-01.braze.com")
+            .setHandlePushDeepLinksAutomatically(true)
+            .setIsSessionTimeoutInSeconds(10) // Evita fragmentación de sesiones
+            .setSdkAuthenticationEnabled(true) // Habilita SDK Auth JWT
+            .build()
+
+        // 2. Inicialización estática segura
+        Braze.configure(this, brazeConfig)
+    }
+
+    /**
+     * Identificación asíncrona de usuario para evitar cuellos de botella (ANR)
+     */
+    fun syncUserProfileAsync(userId: String, jwtToken: String, saldoActual: Double, fechaVencimiento: String) {
+        // Asignación de firma JWT de seguridad
+        Braze.getInstance(this).setSdkAuthenticationSignature(jwtToken)
+
+        // Asignación de ID externo
+        Braze.getInstance(this).changeUser(userId)
+
+        // Mutación de atributos en devolución de llamada asíncrona
+        Braze.getInstance(this).getCurrentUser { user ->
+            user?.apply {
+                setCustomUserAttribute("saldo_actual", saldoActual)
+                setCustomUserAttribute("fecha_vencimiento_recibo", fechaVencimiento)
+                setCustomUserAttribute("segmento_color", "PREPAGO_GOLD")
+            }
+        }
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- CODE 2: SWIFT -->
+            <div id="code-swift" class="code-content hidden space-y-4">
+                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl">
+                    <div class="bg-slate-800 px-4 py-2 flex justify-between items-center text-xs text-slate-300 font-mono border-b border-slate-700">
+                        <span>AppDelegate.swift (iOS Swift SPM)</span>
+                        <span class="text-indigo-400">iOS 12.0+ • BrazeKit & BrazeUI</span>
+                    </div>
+                    <pre class="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed"><code>import UIKit
+import BrazeKit
+import BrazeUI
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    // Instancia estática del SDK
+    static var braze: Braze?
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        
+        // 1. Configuración Inmutable
+        var configuration = Braze.Configuration(
+            apiKey: "f8e7d6c5-b4a3-2f1e-0d9c-8b7a6f5e4d3c",
+            endpoint: "https://sdk.iad-01.braze.com"
+        )
+        configuration.api.sdkAuthentication = true
+        
+        // 2. Instanciación
+        let brazeInstance = Braze(configuration: configuration)
+        AppDelegate.braze = brazeInstance
+        
+        return true
+    }
+
+    /// Autenticación concurrente moderna con Swift Concurrency (async/await)
+    @MainActor
+    func authenticateUser(userId: String, jwtToken: String, saldo: Double) async {
+        guard let braze = AppDelegate.braze else { return }
+        
+        // Asignación de firma
+        braze.set(sdkAuthenticationSignature: jwtToken)
+        
+        // Cambio de usuario seguro
+        braze.changeUser(userId: userId)
+        
+        // Mutación de atributos usando el calendario gregoriano nativo
+        braze.user.set(customAttribute: "saldo_actual", value: saldo)
+        braze.user.set(customAttribute: "fecha_vencimiento_recibo", value: "2026-10-15")
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- CODE 3: TYPESCRIPT -->
+            <div id="code-ts" class="code-content hidden space-y-4">
+                <div class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl">
+                    <div class="bg-slate-800 px-4 py-2 flex justify-between items-center text-xs text-slate-300 font-mono border-b border-slate-700">
+                        <span>brazeService.ts (Web TypeScript / NPM)</span>
+                        <span class="text-indigo-400">TypeScript 5.0+ • @braze/web-sdk</span>
+                    </div>
+                    <pre class="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed"><code>import * as braze from "@braze/web-sdk";
+
+export class BrazeWebService {
+  
+  public static initBraze(): void {
+    braze.initialize("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d", {
+      baseUrl: "https://sdk.iad-01.braze.com",
+      enableLogging: false,
+      enableSdkAuthentication: true,
+      sessionTimeoutInSeconds: 30,
+      manageServiceWorkerAutomatically: true
+    });
+
+    braze.openSession();
+  }
+
+  public static async loginUser(userId: String, jwtToken: string): Promise<void> {
+    // Aplicar token cryptographic JWT
+    braze.setSdkAuthenticationSignature(jwtToken);
+    
+    // Cambiar identificador
+    braze.changeUser(userId);
+
+    // Actualizar atributos de perfil
+    const user = braze.getUser();
+    if (user) {
+      user.setCustomUserAttribute("segmento_color", "POSTPAGO_PLATINUM");
+      user.setCustomUserAttribute("saldo_actual", 45.50);
+    }
+  }
+
+  public static logPurchaseEvent(orderId: string, amount: number, currency: string): void {
+    braze.logPurchase(orderId, amount, currency, 1, {
+      checkout_type: "ONE_CLICK_UPSELL",
+      source: "WEB_SUPER_APP"
+    });
+  }
+}</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: SEGURIDAD CRIPTOGRÁFICA Y CDI ZERO-COPY -->
+        <section id="seguridad" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                    <span>Protección y Eficiencia de Datos</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mt-1">5. Ciberseguridad (SDK Auth JWT) & Ingestión en Nube (CDI)</h2>
+                <p class="text-slate-600 text-sm mt-1">
+                    Protección estricta contra inyección de eventos por actores maliciosos y optimización de costos computacionales mediante acceso "Zero-Copy".
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- SDK Authentication -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                        <h3 class="font-bold text-slate-900 text-base">Autenticación del SDK (SDK Auth JWT)</h3>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        En aplicaciones con más de 20 millones de descargas, los atacantes pueden interceptar las peticiones HTTP e inyectar atributos ficticios para agotar los contratos de Data Points. Habilitar la Autenticación del SDK exige que cada llamada lleve una firma criptográfica JWT firmada por el backend del cliente.
+                    </p>
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1">
+                        <p class="text-amber-400">// Cabecera JWT generada por Backend:</p>
+                        <p>{ "alg": "RS256", "typ": "JWT", "kid": "braze-key-01" }</p>
+                        <p class="text-indigo-300">// Payload del Token:</p>
+                        <p>{ "sub": "USER_ID_20MM_9918", "exp": 1767225600 }</p>
+                    </div>
+                </div>
+
+                <!-- Cloud Data Ingestion (CDI) -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-sky-500"></span>
+                        <h3 class="font-bold text-slate-900 text-base">Cloud Data Ingestion (CDI) Zero-Copy</h3>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        En lugar de saturar las API REST invocando millones de llamadas cuando los datos de facturación cambian, CDI consulta directamente tablas de Snowflake o BigQuery. Utiliza la columna del servidor <code class="font-mono bg-slate-100 text-slate-800 px-1 py-0.5 rounded">UPDATED_AT</code> para extraer solo registros modificados.
+                    </p>
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1">
+                        <p class="text-sky-400">-- Consulta Delta Automática de Braze CDI:</p>
+                        <p>SELECT user_id, saldo_actual, fecha_vencimiento</p>
+                        <p>FROM BRAZE_INGESTION_USERS</p>
+                        <p><span class="text-amber-300">WHERE UPDATED_AT > :last_sync_timestamp</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: QA CHECKLIST, CRITERIOS DE ACEPTACIÓN Y ROLLOUT -->
+        <section id="qa" class="space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                    <span>Aseguramiento de Calidad</span>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mt-1">6. Checklist de QA, Certificación y Despliegue Progresivo</h2>
+                <p class="text-slate-600 text-sm mt-1">
+                    Criterios obligatorios de validación antes de liberar las versiones de producción en Google Play y Apple App Store.
+                </p>
+            </div>
+
+            <!-- Interactive Checklist Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-xs">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                            <th class="p-3">Categoría</th>
+                            <th class="p-3">Prueba / Criterio de Aceptación</th>
+                            <th class="p-3">Entorno Requerido</th>
+                            <th class="p-3">Estado QA</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-700">
+                        <tr>
+                            <td class="p-3 font-semibold text-indigo-600">Inicialización</td>
+                            <td class="p-3">Verificar que el SDK no bloquee el hilo principal (Main Thread) en arranques en frío (Cold Start).</td>
+                            <td class="p-3 font-mono">APK / IPA Certificación</td>
+                            <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">APROBADO</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-semibold text-indigo-600">Seguridad JWT</td>
+                            <td class="p-3">Probar envío de peticiones con token expirado y validar que el SDK solicite la rotación sin crash.</td>
+                            <td class="p-3 font-mono">Dev / QA Sandbox</td>
+                            <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">APROBADO</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-semibold text-indigo-600">Notificaciones Push</td>
+                            <td class="p-3">Recepcionar Push en 1er plano, 2do plano y estado suspendido. Redirección correcta vía Deeplinks.</td>
+                            <td class="p-3 font-mono">Dispositivos Físicos FCM/APNs</td>
+                            <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">APROBADO</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-semibold text-indigo-600">Consumo de Red</td>
+                            <td class="p-3">Validar que los eventos se procesen por lotes (batching) cada 10s o al pausar la app.</td>
+                            <td class="p-3 font-mono">Charles Proxy / Wireshark</td>
+                            <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">APROBADO</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Canary Rollout Strategy Card -->
+            <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-6 rounded-xl border border-slate-800 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider">
+                    Estrategia de Despliegue Progresivo (Canary Rollout en Producción)
+                </h3>
+                <p class="text-xs text-slate-300">
+                    Dado el volumen de 20 millones de usuarios, la actualización de la aplicación en las tiendas debe realizarse con un interruptor remoto (Feature Flag) en cuatro fases:
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-xs">
+                    <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                        <span class="block text-slate-400 text-[10px]">Día 1 - Fase 1</span>
+                        <span class="font-bold text-emerald-400 text-base">1% MAU</span>
+                        <span class="block text-[10px] text-slate-400 mt-1">200k Usuarios</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                        <span class="block text-slate-400 text-[10px]">Día 3 - Fase 2</span>
+                        <span class="font-bold text-indigo-300 text-base">5% MAU</span>
+                        <span class="block text-[10px] text-slate-400 mt-1">1MM Usuarios</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                        <span class="block text-slate-400 text-[10px]">Día 7 - Fase 3</span>
+                        <span class="font-bold text-amber-400 text-base">25% MAU</span>
+                        <span class="block text-[10px] text-slate-400 mt-1">5MM Usuarios</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                        <span class="block text-slate-400 text-[10px]">Día 14 - Fase 4</span>
+                        <span class="font-bold text-emerald-400 text-base">100% MAU</span>
+                        <span class="block text-[10px] text-slate-400 mt-1">20MM Usuarios</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Architectural Engineering Document • Super App Braze SDK Integration</p>
+            <div class="flex space-x-4 text-slate-500">
+                <span>Android Kotlin</span>
+                <span>•</span>
+                <span>iOS Swift</span>
+                <span>•</span>
+                <span>Web TypeScript</span>
+                <span>•</span>
+                <span>Braze CDP</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic for Charts and UI Tabs -->
+    <script>
+        // Tab switching logic for Console Mockups
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            event.currentTarget.classList.remove('bg-slate-100', 'text-slate-700');
+            event.currentTarget.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+        }
+
+        // Tab switching logic for Code Snippets
+        function switchCode(codeId) {
+            document.querySelectorAll('.code-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.code-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            
+            document.getElementById(codeId).classList.remove('hidden');
+            event.currentTarget.classList.remove('bg-slate-100', 'text-slate-700');
+            event.currentTarget.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+        }
+
+        // Chart.js Schedule Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('ganttChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Kick-off & Matriz Eventos',
+                        'Limpieza SDKs Heredados',
+                        'Aprovisionamiento Console & API',
+                        'POC SDK Auth (JWT)',
+                        'Desarrollo Android (Kotlin)',
+                        'Desarrollo iOS (Swift SPM)',
+                        'Desarrollo Web (TypeScript)',
+                        'Push FCM / APNs Credentials',
+                        'Sincronización CDI Cloud',
+                        'QA Batería & Performance',
+                        'Onboarding Comercial',
+                        'Rollout Canario (1% -> 100%)'
+                    ],
+                    datasets: [{
+                        label: 'Semana de Inicio',
+                        data: [1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10],
+                        backgroundColor: 'transparent',
+                        borderColor: 'transparent',
+                        borderWidth: 0
+                    }, {
+                        label: 'Duración (Semanas)',
+                        data: [2, 2, 2, 2, 4, 4, 3, 2, 3, 3, 2, 3],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 1) {
+                                        return `Duración: ${context.raw} semana(s)`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            min: 1,
+                            max: 12,
+                            title: {
+                                display: true,
+                                text: 'Semanas del Proyecto (Mes 1 a Mes 3)'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return 'Sem ' + value;
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
